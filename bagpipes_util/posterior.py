@@ -122,7 +122,6 @@ def plot_pipes_sed(ID, current_pipes, load_phot,filt_list,fit_instructions,ax=No
         redshift = np.median(fit.posterior.samples["redshift"]) #np.median(fit.posterior.samples["redshift"]) 
     else: redshift = fit.fitted_model.model_components["redshift"]
     
-    print(f'z={redshift}')                                                        # if measuring a photz
     wavs=(fit.galaxy.filter_set.eff_wavs*u.AA)
     fluxes = (np.median(fit.posterior.samples["photometry"],axis=0)*u.erg/u.s/u.AA/u.cm**2).to(u.uJy,
                                                                     equivalencies=u.spectral_density(wav=wavs))
@@ -145,7 +144,6 @@ def plot_pipes_sed(ID, current_pipes, load_phot,filt_list,fit_instructions,ax=No
                                                             equivalencies=u.spectral_density(wav=wavs))
     spec_post[:,1] = (spec_post[:,1].astype(float)*u.erg/u.s/u.AA/u.cm**2).to(u.uJy,
                                                             equivalencies=u.spectral_density(wav=wavs))
-    print(np.nanmax(spec_post[:,0]))
     c1='lightgrey'
     c2='xkcd:gray'
     ls='-'
