@@ -6,11 +6,11 @@ from copy import deepcopy
 from scipy.interpolate import interp1d
 from astropy.cosmology import Planck18 as cosmo
 
-def load_galaxy_fit(ID, current_pipes, load_phot, filt_list, fit_instructions):
+def load_galaxy_fit(ID, current_pipes, load_phot, filt_list, fit_instructions, advanced=True):
     gal = pipes.galaxy(ID=ID,load_data=load_phot,spectrum_exists=False,filt_list=filt_list)
     fit = pipes.fit(gal,run=current_pipes,fit_instructions=fit_instructions)
     fit.fit(verbose=False)
-    fit.posterior.get_advanced_quantities()
+    if advanced: fit.posterior.get_advanced_quantities()
     return fit, gal
 
 
@@ -41,6 +41,7 @@ def get_z(fit):
 
 
 def measure_lir(wavs,spec,z,lo=8,hi=1000):
+    """Measures 8--1000 um IR luminosity from posterior model"""
     #assumes rest-frame wavelengths
     DL = cosmo.luminosity_distance(z).to(u.Mpc)
     mask = (wavs>=lo*u.um) & (wavs<=hi*u.um)
@@ -51,10 +52,11 @@ def measure_lir(wavs,spec,z,lo=8,hi=1000):
     
 
 def measure_luv(wavs,spec,z):
+    """measures monochromatic luminosity at 2800 AA"""
     DL = cosmo.luminosity_distance(z).to(u.Mpc)
     mask = (wavs>=2450*u.AA) & (wavs<=3150*u.AA)
     flux = np.mean(spec[mask])
-    luv = (4*np.pi*DL**2*(2800*u.AA)*(1.+z)*flux).to(u.Lsun)
+    luv = (4 * np.pi * DL**2 * (2800*u.AA) * (1.+z) * flux).to(u.Lsun)
     return luv
 
 
