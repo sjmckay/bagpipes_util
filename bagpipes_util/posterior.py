@@ -6,9 +6,9 @@ from copy import deepcopy
 from scipy.interpolate import interp1d
 from astropy.cosmology import Planck18 as cosmo
 
-def load_galaxy_fit(ID, current_pipes, load_phot, filt_list, fit_instructions, advanced=True):
+def load_galaxy_fit(ID, run_name, load_phot, filt_list, fit_instructions, advanced=True):
     gal = pipes.galaxy(ID=ID,load_data=load_phot,spectrum_exists=False,filt_list=filt_list)
-    fit = pipes.fit(gal,run=current_pipes,fit_instructions=fit_instructions)
+    fit = pipes.fit(gal,run=run_name,fit_instructions=fit_instructions)
     fit.fit(verbose=False)
     if advanced: fit.posterior.get_advanced_quantities()
     return fit, gal
@@ -83,18 +83,17 @@ def measure_flux_in_filter(wavs,spec,z, filter):
     norm = np.sum(wavs[mask][1:]*dl*filter_interp(wavs[mask][1:]*(1.+z)))
     flux = result/norm
     flux = (flux).to(u.Jy,equivalencies=u.spectral_density(wav=np.mean(wavs[mask]*(1.+z))))
-    
     return flux
 
 
-def plot_pipes_sed(ID, current_pipes, load_phot,filt_list,fit_instructions,ax=None,label='GS',zlab='z',num=0,
+def plot_pipes_sed(ID, run_name, load_phot,filt_list,fit_instructions,ax=None,label='GS',zlab='z',num=0,
                   secondary=False, zerr=None):
     
     if ax is None: f, ax = plt.subplots(figsize=(5,2),dpi=180)
     else: f = ax.get_figure()
         
     galtest = pipes.galaxy(ID=ID,load_data=load_phot,spectrum_exists=False,filt_list=filt_list)
-    fit = pipes.fit(galtest,run=current_pipes,fit_instructions=fit_instructions)
+    fit = pipes.fit(galtest,run=run_name,fit_instructions=fit_instructions)
     fit.fit(verbose=False)
     fit.posterior.get_advanced_quantities()
     
