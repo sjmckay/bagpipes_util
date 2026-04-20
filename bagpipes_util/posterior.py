@@ -86,9 +86,42 @@ def measure_flux_in_filter(wavs,spec,z, filter):
     return flux
 
 
-def plot_pipes_sed(ID, run_name, load_phot,filt_list,fit_instructions,ax=None,label='GS',zlab='z',num=0,
-                  secondary=False, zerr=None):
+def plot_pipes_sed(ID, run_name, load_phot,filt_list,fit_instructions,
+                   ax=None,label='GS',
+                   zlab='z',num=0,
+                   zerr=None):
+    """Helper function to plot the SED fit for a given ID.
     
+    Parameters
+    ----------
+    ID : int
+        The ID of the galaxy to plot.
+    run_name : str
+        The name of the current BAGPIPES run.
+    load_phot : function
+        The function to load the photometry for a given ID.
+    filt_list : list
+        The list of filter file paths
+    fit_instructions : dict
+        The dictionary of fit instructions for BAGPIPES.
+    ax : matplotlib.axes.Axes, optional
+        The axes to plot on. If None, a new figure and axes will be created.
+    label : str, optional
+        The label to annotate the plot with. If None, the ID will be used.
+    zlab : str, optional
+        The label for the redshift annotation. Default is 'z'.
+    num : int, optional
+        The number to annotate the plot with. Default is 0.
+    zerr : tuple, optional
+        The redshift error to annotate the plot with. Should be a tuple of (zerr_plus, zerr_minus). Default is None.  
+    
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The figure containing the plot.
+    matplotlib.axes.Axes
+        The axes containing the plot.
+    """
     if ax is None: f, ax = plt.subplots(figsize=(5,2),dpi=180)
     else: f = ax.get_figure()
         
@@ -105,8 +138,7 @@ def plot_pipes_sed(ID, run_name, load_phot,filt_list,fit_instructions,ax=None,la
                                                                     equivalencies=u.spectral_density(wav=wavs))
     observed = (errs<90*u.mJy)
     ulims = (fluxes/errs<3)
-    if secondary: ms = 4
-    else: ms=3
+    ms=3
     p=ax.errorbar(wavs.to(u.um)[observed&~ulims],fluxes[observed&~ulims],yerr=errs[observed&~ulims],
                 marker='o',mec='xkcd:dark slate blue',mfc='w',ms=ms,mew=0.9,
                 elinewidth=0.5,ecolor='k',capsize=1.7,
@@ -148,10 +180,7 @@ def plot_pipes_sed(ID, run_name, load_phot,filt_list,fit_instructions,ax=None,la
     c1='lightgrey'
     c2='xkcd:gray'
     ls='-'
-    if secondary:
-        c1='xkcd:light peach'
-        c2='xkcd:pumpkin orange' 
-        ls='--'
+
     p=ax.plot(wavs.to(u.um), spec_post[:, 0], color=c1,lw=0.3,
                 zorder=1)
     p=ax.plot(wavs.to(u.um), spec_post[:, 1], color=c1,lw=0.3,
@@ -167,9 +196,7 @@ def plot_pipes_sed(ID, run_name, load_phot,filt_list,fit_instructions,ax=None,la
         redshift = np.round(redshift,2)
     else: zerrstr = ''
     ax.annotate(f'{label}-{num}',(0.025,0.87),xycoords='axes fraction',fontsize=12)
-    if not secondary: ax.annotate(f'${zlab}$'+r'$ = $'+f'{np.round(redshift,3)}'+zerrstr,(0.025,0.73),xycoords='axes fraction',fontsize=12)
-    else: ax.annotate(f'${zlab}$'+r'$ = $'+f'{np.round(redshift,2)}'+zerrstr,(0.025,0.64), color=c2,
-                      xycoords='axes fraction',fontsize=12)
+    ax.annotate(f'${zlab}$'+r'$ = $'+f'{np.round(redshift,3)}'+zerrstr,(0.025,0.73),xycoords='axes fraction',fontsize=12)
     ax.tick_params(axis='both',which='both',direction='in')
     
     return f,ax
